@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useApi } from "../hooks/useApi";
 import { useToast } from "../components/ToastProvider";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function Login({
   setIsAuth,
@@ -15,6 +16,16 @@ export default function Login({
   const { error } = useToast();
   const navigate = useNavigate();
   const { fetchData, loading } = useApi();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("authToken", token);
+      setIsAuth(true);
+      navigate("/home");
+    }
+  }, [navigate, setIsAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +154,7 @@ export default function Login({
 
           <button
             type="button"
-            onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`}
+            onClick={() => window.location.href = API_ENDPOINTS.auth.google}
             className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-gray-200 rounded-2xl shadow-sm bg-white text-gray-700 font-bold hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-all active:scale-[0.98]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

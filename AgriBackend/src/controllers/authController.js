@@ -156,7 +156,7 @@ const authController = {
             res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 900000 });
             res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 604800000 });
 
-            return res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+            return res.redirect(`${process.env.CLIENT_URL}/login?token=${accessToken}`);
 
         } catch (err) {
             console.error("Google Callback Error:", err);
