@@ -17,18 +17,12 @@ const PORT = process.env.PORT || 5000;
 // Create HTTP server
 const server = http.createServer(app);
 
-// Define allowed origins
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://astrofrontend-30sp.onrender.com",
-  "https://agri-tech-jq3geffqn-shruti-karnas-projects.vercel.app/",
-  "https://hiagribackend-production.up.railway.app/",
-  "https://agri-tech-git-main-shruti-karnas-projects.vercel.app"
-];
+// Define allowed origins – driven by environment variables.
+// Set CLIENT_URL (and optionally CLIENT_URL_2) in your Render dashboard.
+const allowedOrigins = ["http://localhost:5173"];
 
-if (process.env.CLIENT_URL) {
-  allowedOrigins.push(process.env.CLIENT_URL);
-}
+if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
+if (process.env.CLIENT_URL_2) allowedOrigins.push(process.env.CLIENT_URL_2);
 
 // Initialize Socket.IO with CORS
 const io = new Server(server, {
@@ -51,7 +45,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-app.use(morgan("common"));
+app.use(morgan(process.env.NODE_ENV === "production" ? "tiny" : "dev"));
 app.use(helmet());
 app.use(cookieParser());
 app.use(passport.initialize());
