@@ -7,8 +7,6 @@ const jwt = require('jsonwebtoken');
 const authController = {
     register: async (req, res) => {
         try {
-            // console.log("Received Data:", req.body);
-
             if (!req.body.emailId) {
                 return res.status(400).json({ message: 'Email ID is required' });
             }
@@ -28,22 +26,18 @@ const authController = {
                 role: req.body.role || 'customer'
             };
 
-            // console.log(`[${new Date().toISOString()}] Saving user to DB...`);
             const user = await userRepository.createUser(newUser);
-            // console.log(`[${new Date().toISOString()}] User saved: ${user._id}`);
 
             if (!user.emailId || !user.confirmationCode) {
                 console.error("Missing email or confirmation code after save!");
                 return res.status(500).json({ message: "User data incomplete." });
             }
 
-            // console.log(`Sending verification email to ${user.emailId}...`);
-
             try {
-                const info = await sendEmail(user.firstname, user.emailId, user.confirmationCode);
-                // console.log("Email sent successfully:", info.messageId);
+                await sendEmail(user.firstname, user.emailId, user.confirmationCode);
             } catch (emailErr) {
-                console.error("Email sending failed:", emailErr);
+                // Email failure should NOT block registration — just log it
+                console.error("Email sending failed (non-fatal):", emailErr.message);
             }
 
             return res.status(200).json({
@@ -51,10 +45,15 @@ const authController = {
             });
 
         } catch (err) {
-            console.error("Register Error:", err);
-            return res.status(500).json({ message: 'Server error' });
+            console.error("Register Error:", err.message, err.stack);
+            return res.status(500).json({
+                message: process.env.NODE_ENV === 'production'
+                    ? 'Server error during registration'
+                    : err.message
+            });
         }
     },
+
 
     // ================= LOGIN =================
     login: async (req, res) => {

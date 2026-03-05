@@ -1,8 +1,19 @@
 require("dotenv").config();
+
+// ── Required environment variable guard ──────────────────────────────────────
+const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET", "REFRESH_SECRET"];
+const missingEnv = REQUIRED_ENV.filter((k) => !process.env[k]);
+if (missingEnv.length) {
+  console.error(`❌  Missing required environment variables: ${missingEnv.join(", ")}`);
+  process.exit(1);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const helmet = require("helmet");
+
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const http = require("http");
