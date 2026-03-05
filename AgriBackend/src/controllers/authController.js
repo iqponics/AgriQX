@@ -45,6 +45,11 @@ const authController = {
             });
 
         } catch (err) {
+            // Mongoose validation error → 400, not 500
+            if (err.name === 'ValidationError') {
+                const messages = Object.values(err.errors).map(e => e.message);
+                return res.status(400).json({ message: messages.join('. ') });
+            }
             console.error("Register Error:", err.message, err.stack);
             return res.status(500).json({
                 message: process.env.NODE_ENV === 'production'
