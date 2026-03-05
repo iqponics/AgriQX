@@ -27,18 +27,31 @@ export default function SignUp() {
       return;
     }
 
+    if (firstName.trim().length < 3) {
+      error('First name must be at least 3 characters.');
+      return;
+    }
+    if (lastName.trim().length < 3) {
+      error('Last name must be at least 3 characters.');
+      return;
+    }
+    if (password.length < 6) {
+      error('Password must be at least 6 characters.');
+      return;
+    }
+
     try {
-      const response = await fetchData<any, any>("/auth/register", "POST", {
+      await fetchData<any, any>("/auth/register", "POST", {
         body: {
-          firstname: firstName,
-          lastname: lastName,
+          firstname: firstName.trim(),
+          lastname: lastName.trim(),
           emailId: email,
           password,
           role: userType
         },
       });
 
-      success('Signup successful! Redirecting to login...');
+      success('Signup successful! Check your email to verify your account.');
 
       setTimeout(() => {
         navigate('/login');
@@ -48,6 +61,7 @@ export default function SignUp() {
       error(err.message || 'Signup failed.');
     }
   };
+
 
 
   return (
@@ -187,12 +201,6 @@ export default function SignUp() {
             <Link to="/login" className="font-bold text-leaf-600 hover:text-leaf-700 transition-colors ml-1">
               Log In
             </Link>
-            <div className="mt-4 pt-4 border-t border-leaf-100 flex items-center justify-center gap-2 grayscale brightness-125">
-              <span className="w-2 h-2 bg-leaf-400 rounded-full animate-pulse"></span>
-              <p className="text-[10px] uppercase tracking-tighter font-bold text-leaf-600/60 font-sans">
-                Demo Registration • No Backend Required
-              </p>
-            </div>
           </div>
         </form>
 
