@@ -58,7 +58,7 @@ passport.use(new GoogleStrategy({
             password: uuidv4(),
             status: "Active",
             isAstrologer: false,
-            role: "User"
+            role: "customer"
         });
 
         const validationError = newUser.validateSync();
