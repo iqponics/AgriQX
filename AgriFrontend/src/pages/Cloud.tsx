@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useApi } from "../hooks/useApi";
 import { useToast } from "../components/ToastProvider";
+import { userApi } from "../api/userApi";
+import { fileApi } from "../api/fileApi";
 
 type ActiveTab = "files" | "recent" | "images" | "documents" | "videos";
 
@@ -53,7 +55,7 @@ export default function Cloud() {
           return;
         }
 
-        fetchData<unknown, any>(`/users/${userIdFromToken}`, 'GET')
+        fetchData<unknown, any>(userApi.getUser(userIdFromToken), 'GET')
           .then((data) => {
             setCurrentUser({ ...data, id: data._id, accessToken: token });
           })
@@ -72,7 +74,7 @@ export default function Cloud() {
     if (!userId || !authToken) return;
     const fetchFiles = async () => {
       try {
-        const data = await fetchData<unknown, any[]>("/files/", "POST", {
+        const data = await fetchData<unknown, any[]>(fileApi.base(), "POST", {
           body: { userId },
         });
         const mappedFiles = data.map((file: any) => ({
@@ -97,7 +99,7 @@ export default function Cloud() {
       formData.append("file", file);
       formData.append("userId", userId);
       try {
-        const uploadedFile = await fetchData<unknown, any>("/files/fileUpload", "POST", {
+        const uploadedFile = await fetchData<unknown, any>(fileApi.upload(), "POST", {
           body: formData as unknown as any,
         });
         const mappedFile = { ...uploadedFile, id: uploadedFile._id };
@@ -112,7 +114,7 @@ export default function Cloud() {
     if (!userId) return;
     try {
       await fetchData<unknown, any>(
-        `/files/permanentDelete?fileId=${fileId}&userId=${userId}`,
+        fileApi.permanentDelete(fileId, userId),
         "DELETE"
       );
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -127,7 +129,7 @@ export default function Cloud() {
     if (!emails) return;
     const sharedWith = emails.split(",").map((email) => email.trim());
     try {
-      await fetchData<unknown, any>("/files/shared/", "PUT", {
+      await fetchData<unknown, any>(fileApi.shared(), "PUT", {
         body: { fileId, userId, sharedWith },
       });
       success("File shared successfully!");

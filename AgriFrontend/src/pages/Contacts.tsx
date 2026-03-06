@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { User as UserIcon, Check, X, Clock } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
+import { userApi } from '../api/userApi';
 import { jwtDecode } from 'jwt-decode';
 
 interface PendingRequest {
@@ -58,7 +59,7 @@ export default function Contacts() {
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
-        fetchData<unknown, any>(`/users/${decoded.id}`, 'GET').then(user => {
+        fetchData<unknown, any>(userApi.getUser(decoded.id), 'GET').then(user => {
           setCurrentUser(user);
         });
       } catch (err) {
@@ -73,7 +74,7 @@ export default function Contacts() {
     const loadData = async () => {
       try {
         // Fetch populated contacts
-        const contactsData = await fetchData<unknown, Contact[]>(`/users/contacts/${currentUser._id}`, 'GET');
+        const contactsData = await fetchData<unknown, Contact[]>(userApi.getContacts(currentUser._id), 'GET');
         setContacts(contactsData);
 
         // Fetch pending requests - we'll fetch details for each contactorId for now
@@ -81,7 +82,7 @@ export default function Contacts() {
         if (currentUser.pendingContacts) {
           const pendingWithDetails = await Promise.all(
             currentUser.pendingContacts.map(async (p: any) => {
-              const details = await fetchData<unknown, any>(`/users/${p.contactorId}`, 'GET');
+              const details = await fetchData<unknown, any>(userApi.getUser(p.contactorId), 'GET');
               return { ...p, contactorDetail: details };
             })
           );
@@ -97,10 +98,10 @@ export default function Contacts() {
 
   const handleAccept = async (contactorId: string) => {
     try {
-      await fetchData<unknown, any>(`/users/${contactorId}/acceptConnect`, 'PUT');
+      await fetchData<unknown, any>(userApi.acceptConnect(contactorId), 'PUT');
       setPending(prev => prev.filter(p => p.contactorId !== contactorId));
       // Refresh contacts
-      const updatedContacts = await fetchData<unknown, Contact[]>(`/users/contacts/${currentUser._id}`, 'GET');
+      const updatedContacts = await fetchData<unknown, Contact[]>(userApi.getContacts(currentUser._id), 'GET');
       setContacts(updatedContacts);
     } catch (err) {
       console.error('Failed to accept:', err);
@@ -109,7 +110,7 @@ export default function Contacts() {
 
   const handleDecline = async (contactorId: string) => {
     try {
-      await fetchData<unknown, any>(`/users/${contactorId}/declineConnect`, 'PUT');
+      await fetchData<unknown, any>(userApi.declineConnect(contactorId), 'PUT');
       setPending(prev => prev.filter(p => p.contactorId !== contactorId));
     } catch (err) {
       console.error('Failed to decline:', err);

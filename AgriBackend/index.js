@@ -33,7 +33,6 @@ const server = http.createServer(app);
 const allowedOrigins = ["http://localhost:5173"];
 
 if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
-if (process.env.CLIENT_URL_2) allowedOrigins.push(process.env.CLIENT_URL_2);
 
 // Initialize Socket.IO with CORS
 const io = new Server(server, {

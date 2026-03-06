@@ -7,8 +7,11 @@ import CallInterface from "../components/CallInterface";
 import IncomingCallModal from "../components/IncomingCallModal";
 import OutgoingCallModal from "../components/OutgoingCallModal";
 
-import { API_BASE_URL } from "../config/api";
+// Removing API_BASE_URL import as we handle it inside useApi and our modular APIs.
 import { useToast } from "../components/ToastProvider";
+import { userApi } from "../api/userApi";
+import { messageApi } from "../api/messageApi";
+import { API_BASE_URL } from "../api/apiConfig";
 
 const SOCKET_URL = API_BASE_URL;
 
@@ -66,7 +69,7 @@ export default function Messages() {
         const decoded: any = jwtDecode(token);
         console.log("Decoded Token:", decoded);
         const userId = decoded.id;
-        fetchData<unknown, any>(`/users/${userId}`, 'GET').then(data => {
+        fetchData<unknown, any>(userApi.getUser(userId), 'GET').then(data => {
           setCurrentUser(data);
         });
 
@@ -146,7 +149,7 @@ export default function Messages() {
       setLoading(true);
       try {
         console.log("Fetching conversations for user:", currentUser._id);
-        const data = await fetchData<unknown, Conversation[]>(`/conversation/${currentUser._id}`, 'GET');
+        const data = await fetchData<unknown, Conversation[]>(messageApi.conversationBase(currentUser._id), 'GET');
         console.log("Conversations fetched:", data);
         setConversations(data || []);
       } catch (err) {
@@ -165,7 +168,7 @@ export default function Messages() {
     const loadContacts = async () => {
       if (!currentUser?._id) return;
       try {
-        const data = await fetchData<unknown, any[]>(`/users/contacts/${currentUser._id}`, 'GET');
+        const data = await fetchData<unknown, any[]>(userApi.getContacts(currentUser._id), 'GET');
         console.log("Contacts fetched:", data);
         setContacts(data || []);
       } catch (err) {
@@ -181,7 +184,7 @@ export default function Messages() {
       if (!selectedId) return;
       try {
         console.log("Fetching messages for conversation:", selectedId);
-        const data = await fetchData<unknown, Message[]>(`/message/${selectedId}`, 'GET');
+        const data = await fetchData<unknown, Message[]>(messageApi.getMessages(selectedId), 'GET');
         console.log("Messages fetched:", data);
         setMessages(data || []);
       } catch (err) {
@@ -214,7 +217,7 @@ export default function Messages() {
         text: newMessage,
       };
 
-      const result = await fetchData<typeof payload, Message>('/message', 'POST', {
+      const result = await fetchData<typeof payload, Message>(messageApi.base(), 'POST', {
         body: payload
       });
 
@@ -463,7 +466,7 @@ export default function Messages() {
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   if (e.target.value.trim().length > 1) {
-                    fetchData<unknown, any[]>(`/users/search/query?q=${e.target.value}`, 'GET')
+                    fetchData<unknown, any[]>(userApi.searchQuery(e.target.value), 'GET')
                       .then(data => setSearchResults(data))
                       .catch(console.error);
                   } else {
@@ -484,7 +487,7 @@ export default function Messages() {
                     onClick={async () => {
                       try {
                         // Find or create conversation
-                        const convo = await fetchData<unknown, Conversation>(`/conversation/find/${currentUser._id}/${user._id}`, 'GET');
+                        const convo = await fetchData<unknown, Conversation>(messageApi.conversationFind(currentUser._id, user._id), 'GET');
 
                         // Check if already in list
                         if (!conversations.find(c => c._id === convo._id)) {
@@ -577,7 +580,7 @@ export default function Messages() {
                               setSelectedId(existing._id);
                             } else {
                               // Start new conversation
-                              const convo = await fetchData<unknown, Conversation>(`/conversation/find/${currentUser._id}/${contact._id}`, 'GET');
+                              const convo = await fetchData<unknown, Conversation>(messageApi.conversationFind(currentUser._id, contact._id), 'GET');
                               setConversations(prev => [convo, ...prev]);
                               setSelectedId(convo._id);
                             }

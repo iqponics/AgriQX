@@ -21,7 +21,7 @@ import EcommerceRoutes from "./ecommerce/routes/EcommerceRoutes";
 import { useState, useEffect } from "react";
 import ProfileInfo from "./pages/ProfileInfo";
 import Navbar1 from "./components/Navbar1";
-import LawyerProfile from "./pages/LawyerProfile";
+import VendorProfile from "./pages/VendorProfile";
 import ProductCart from "./pages/ProductCart";
 import PublicProductDetails from "./pages/PublicProductDetails";
 import FarmerProductLifecycle from "./pages/FarmerProductLifecycle";
@@ -121,11 +121,11 @@ function App() {
               />
               // Change from :name to :userId
               <Route
-                path="/lawyer/:userId"
+                path="/vendor/:userId"
                 element={
                   <>
                     <Navbar setIsAuth={setIsAuth} />
-                    <LawyerProfile />
+                    <VendorProfile />
                     <Footer />
                   </>
                 }

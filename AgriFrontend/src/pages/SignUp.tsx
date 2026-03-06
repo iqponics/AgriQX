@@ -5,7 +5,7 @@ import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import CustomSelect from '../components/CustomSelect';
 import { useToast } from '../components/ToastProvider';
-import { API_ENDPOINTS } from "../config/api";
+import { authApi } from "../api/authApi";
 
 export default function SignUp() {
   const [firstName, setFirstName] = useState('');
@@ -41,7 +41,7 @@ export default function SignUp() {
     }
 
     try {
-      await fetchData<any, any>("/auth/register", "POST", {
+      await fetchData<any, any>(authApi.register(), "POST", {
         body: {
           firstname: firstName.trim(),
           lastname: lastName.trim(),
@@ -184,7 +184,7 @@ export default function SignUp() {
 
           <button
             type="button"
-            onClick={() => window.location.href = API_ENDPOINTS.auth.google}
+            onClick={() => window.location.href = authApi.google()}
             className="w-full flex items-center justify-center gap-3 py-4 px-4 border border-leaf-100 rounded-xl text-charcoal-800 bg-white hover:bg-leaf-50 focus:outline-none focus:ring-2 focus:ring-leaf-500/20 transition-all font-bold group shadow-sm"
           >
             <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useApi } from "../hooks/useApi";
 import { useToast } from "../components/ToastProvider";
-import { API_ENDPOINTS } from "../config/api";
+import { authApi } from "../api/authApi";
 
 export default function Login({
   setIsAuth,
@@ -31,7 +31,7 @@ export default function Login({
     e.preventDefault();
 
     try {
-      const response = await fetchData<any, any>("/auth/login", "POST", {
+      const response = await fetchData<any, any>(authApi.login(), "POST", {
         body: { emailId: email, password },
       });
 
@@ -154,7 +154,7 @@ export default function Login({
 
           <button
             type="button"
-            onClick={() => window.location.href = API_ENDPOINTS.auth.google}
+            onClick={() => window.location.href = authApi.google()}
             className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-gray-200 rounded-2xl shadow-sm bg-white text-gray-700 font-bold hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-all active:scale-[0.98]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

@@ -47,8 +47,12 @@ const userController = {
                 id.equals(req.params.userId)
             );
 
+            const isConnected = currentUser.contacts.some(id =>
+                id.equals(req.params.userId)
+            );
+
             const { password, updatedAt, isAdmin, ...others } = user._doc;
-            res.status(200).json({ ...others, isRequestSent });
+            res.status(200).json({ ...others, isRequestSent, isConnected });
         } catch (err) {
             res.status(500).json({ message: 'Failed to fetch user', error: err.message });
         }
@@ -113,8 +117,8 @@ const userController = {
             await userRepository.updateById(user._id, { $push: { contacts: contactor._id } });
             await userRepository.updateById(contactor._id, { $push: { contacts: user._id } });
 
-            await userRepository.updateById(user._id, { $pull: { pendingContacts: { contactorId: contactor._id } } });
-            await userRepository.updateById(contactor._id, { $pull: { sentContact: user._id } });
+            await userRepository.updateById(user.id, { $pull: { pendingContacts: { contactorId: contactor.id } } });
+            await userRepository.updateById(contactor.id, { $pull: { sentContact: user.id } });
 
             res.status(200).json({ message: 'Request Accepted!' });
         } catch (err) {
@@ -164,10 +168,10 @@ const userController = {
             const user = await userRepository.findById(req.user.id);
             const contactor = await userRepository.findById(req.params.id);
 
-            await userRepository.updateById(user._id, {
-                $pull: { pendingContacts: { contactorId: req.params.id } }
+            await userRepository.updateById(user.id, {
+                $pull: { pendingContacts: { contactorId: contactor.id } }
             });
-            await userRepository.updateById(contactor._id, { $pull: { sentContact: req.user.id } });
+            await userRepository.updateById(contactor.id, { $pull: { sentContact: user.id } });
 
             res.status(200).json({ message: 'Request declined' });
         } catch (err) {

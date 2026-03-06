@@ -198,7 +198,7 @@ export default function Home() {
                     <MapPin className="w-4 h-4 mr-1 text-leaf-600" /> {partner.geoLocation?.city || "Remote"}
                   </p>
                   <Link
-                    to={`/lawyer/${partner._id}`}
+                    to={`/vendor/${partner._id}`}
                     className="bg-leaf-600 hover:bg-leaf-700 text-white py-2.5 px-6 rounded-xl text-sm font-bold transition-all shadow-lg shadow-leaf-100/50 group-hover:shadow-leaf-500/20 active:scale-95"
                   >
                     View Store

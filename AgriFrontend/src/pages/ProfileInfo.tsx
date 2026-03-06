@@ -6,6 +6,8 @@ import ProfessionalModal from '../components/ProfessionalModal';
 import ExperienceModal from '../components/ExperienceModal';
 import { jwtDecode } from 'jwt-decode';
 import { useApi } from '../hooks/useApi';
+import { userApi } from '../api/userApi';
+import { fileApi } from '../api/fileApi';
 
 // Types for profile data
 interface Education {
@@ -137,7 +139,7 @@ const ProfileInfo: React.FC = () => {
         return;
       }
       try {
-        const data = await fetchData<unknown, ProfileData>(`/users/${userId}`, 'GET');
+        const data = await fetchData<unknown, ProfileData>(userApi.getUser(userId), 'GET');
         console.log('Profile data fetched:', data);
         setProfileData(data);
       } catch (err) {
@@ -162,7 +164,7 @@ const ProfileInfo: React.FC = () => {
         profilePic: introForm.profilePic,
       };
 
-      const result = await fetchData<typeof payload, any>(`/users/${userId}`, 'PUT', {
+      const result = await fetchData<typeof payload, any>(userApi.getUser(userId), 'PUT', {
         body: payload,
       });
 
@@ -189,7 +191,7 @@ const ProfileInfo: React.FC = () => {
   const handleEducationSubmit = async () => {
     const newEducation = { ...educationForm };
     try {
-      const result = await fetchData<{ education: Education[] }, any>(`/users/${userId}`, 'PUT', {
+      const result = await fetchData<{ education: Education[] }, any>(userApi.getUser(userId), 'PUT', {
         body: {
           education: [...(profileData.education || []), newEducation],
         },
@@ -209,7 +211,7 @@ const ProfileInfo: React.FC = () => {
   const handleProfessionalSubmit = async () => {
     const newProfessional = { ...professionalForm };
     try {
-      const result = await fetchData<{ professional: Professional[] }, any>(`/users/${userId}`, 'PUT', {
+      const result = await fetchData<{ professional: Professional[] }, any>(userApi.getUser(userId), 'PUT', {
         body: { professional: [newProfessional] },
       });
       console.log('Professional update response:', result);
@@ -228,7 +230,7 @@ const ProfileInfo: React.FC = () => {
   const handleExperienceSubmit = async () => {
     const newExperience = { ...experienceForm };
     try {
-      const result = await fetchData<{ experience: Experience[] }, any>(`/users/${userId}`, 'PUT', {
+      const result = await fetchData<{ experience: Experience[] }, any>(userApi.getUser(userId), 'PUT', {
         body: {
           experience: [...(profileData.experience || []), newExperience],
         },
@@ -250,7 +252,7 @@ const ProfileInfo: React.FC = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const result = await fetchData<FormData, any>(`/upload/${userId}`, 'POST', {
+      const result = await fetchData<FormData, any>(fileApi.uploadBase(userId), 'POST', {
         body: formData,
       });
 
@@ -259,7 +261,7 @@ const ProfileInfo: React.FC = () => {
       }
       // Update UI optimistically
       setProfileData((prev) => ({ ...prev, profilePic: result.url }));
-      await fetchData<{ profilePic: string }, any>(`/users/${userId}`, 'PUT', {
+      await fetchData<{ profilePic: string }, any>(userApi.getUser(userId), 'PUT', {
         body: { profilePic: result.url },
       });
     } catch (err) {

@@ -4,6 +4,8 @@ import { formatDistanceToNow } from "date-fns";
 import { ImageIcon, ThumbsUp, MessageCircle, Share2 } from "lucide-react";
 import { useApi } from "../hooks/useApi";
 import { useToast } from "../components/ToastProvider";
+import { postApi } from "../api/postApi";
+import { userApi } from "../api/userApi";
 
 interface AppUser {
   _id: string;
@@ -55,7 +57,7 @@ export default function Feed() {
         const decoded: any = jwtDecode(token);
 
         const userId = decoded.id;
-        fetchData<unknown, any>(`/users/${userId}`, 'GET')
+        fetchData<unknown, any>(userApi.getUser(userId), 'GET')
           .then((data) => {
             setCurrentUser({ ...data, _id: data._id, accessToken: token });
           })
@@ -73,14 +75,14 @@ export default function Feed() {
     if (currentUser) {
       const fetchContacts = async () => {
         try {
-          const userData = await fetchData<unknown, any>(`/users/${currentUser._id}`, 'GET');
+          const userData = await fetchData<unknown, any>(userApi.getUser(currentUser._id), 'GET');
           if (!userData.contacts || userData.contacts.length === 0) {
             setContacts([]);
             return;
           }
           const acceptedContacts: AppUser[] = await Promise.all(
             userData.contacts.map(async (contactId: string) => {
-              const data = await fetchData<unknown, any>(`/users/${contactId}`, 'GET');
+              const data = await fetchData<unknown, any>(userApi.getUser(contactId), 'GET');
               return {
                 _id: contactId,
                 firstname: data.firstname,
@@ -102,7 +104,7 @@ export default function Feed() {
   // Fetch feed posts: current user's posts + contacts' posts
   useEffect(() => {
     if (currentUser) {
-      fetchData<unknown, Post[]>(`/posts/feed/${currentUser._id}`, 'GET')
+      fetchData<unknown, Post[]>(postApi.feed(currentUser._id), 'GET')
         .then((data) => setPosts(data))
         .catch((err) => console.error("Error fetching feed posts:", err));
     }
@@ -117,7 +119,7 @@ export default function Feed() {
       desc: newPost.content,
       img: newPost.image,
     };
-    fetchData<typeof payload, Post>("/posts", "POST", { body: payload })
+    fetchData<typeof payload, Post>(postApi.base(), "POST", { body: payload })
       .then((createdPost) => {
         setPosts([createdPost, ...posts]);
         setNewPost({ content: "", image: "" });
@@ -139,10 +141,10 @@ export default function Feed() {
 
   // Handle liking a post
   const handleLike = (postId: string) => {
-    fetchData<unknown, any>(`/posts/${postId}/like`, "PUT", { body: { userId: currentUser?._id } })
+    fetchData<unknown, any>(postApi.like(postId), "PUT", { body: { userId: currentUser?._id } })
       .then(() => {
         if (currentUser) {
-          fetchData<unknown, Post[]>(`/posts/feed/${currentUser._id}`, 'GET')
+          fetchData<unknown, Post[]>(postApi.feed(currentUser._id), 'GET')
             .then((data) => setPosts(data));
         }
       })
@@ -152,12 +154,12 @@ export default function Feed() {
   // Handle commenting on a post
   const handleComment = (post: Post) => {
     if (!newComment.trim()) return;
-    fetchData<unknown, any>(`/posts/addcomment/${post._id}`, "PUT", {
+    fetchData<unknown, any>(postApi.addComment(post._id), "PUT", {
       body: { userId: currentUser?._id, comment: newComment },
     })
       .then(() => {
         if (currentUser) {
-          fetchData<unknown, Post[]>(`/posts/feed/${currentUser._id}`, 'GET')
+          fetchData<unknown, Post[]>(postApi.feed(currentUser._id), 'GET')
             .then((data) => setPosts(data));
         }
         setNewComment("");

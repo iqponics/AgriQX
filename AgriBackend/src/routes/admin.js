@@ -14,6 +14,9 @@ router.get("/users", verifyToken, isAdmin, adminController.getUsers);
 // PATCH Verify Lawyer
 router.patch("/users/:id/verify", verifyToken, isAdmin, adminController.verifyLawyer);
 
+// PATCH Update User Role
+router.patch("/users/:id/role", verifyToken, isAdmin, adminController.updateUserRole);
+
 // DELETE User
 router.delete("/users/:id", verifyToken, isAdmin, adminController.deleteUser);
 

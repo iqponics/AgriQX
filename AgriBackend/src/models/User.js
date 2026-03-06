@@ -134,7 +134,6 @@ const UserSchema = new mongoose.Schema({
     },
     confirmationCode: {
         type: String,
-        unique: true,
     },
     subscriptionType: {
         type: String,

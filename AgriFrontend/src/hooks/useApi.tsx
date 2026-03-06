@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { API_BASE_URL } from "../config/api";
+
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -9,7 +9,7 @@ interface ApiOptions<T> {
 }
 
 export const useApi = (
-  baseUrl: string = `${API_BASE_URL}/api`
+  baseUrl: string = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 ) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,13 @@ export const useApi = (
       setError(null);
 
       try {
-        const url = `${baseUrl}${endpoint}`;
+        // If the endpoint is already an absolute URL (e.g. from our new api module), use it directly.
+        // Otherwise, prepend the baseUrl and make sure there's a starting slash.
+        const isAbsoluteURL = endpoint.startsWith('http://') || endpoint.startsWith('https://');
+        const url = isAbsoluteURL
+          ? endpoint
+          : `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+
         const token = localStorage.getItem("authToken");
 
         const isFormData = options?.body instanceof FormData;

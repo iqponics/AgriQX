@@ -77,6 +77,25 @@ const adminController = {
         }
     },
 
+    updateUserRole: async (req, res) => {
+        try {
+            const { role } = req.body;
+            if (!['vendor', 'customer', 'admin'].includes(role)) {
+                return res.status(400).json({ message: "Invalid role specified" });
+            }
+
+            const user = await userRepository.findByIdAndUpdate(
+                req.params.id,
+                { $set: { role: role } }
+            );
+            if (!user) return res.status(404).json({ message: "User not found" });
+
+            res.status(200).json({ message: "User role updated successfully", user });
+        } catch (err) {
+            res.status(500).json({ message: "Failed to update role", error: err.message });
+        }
+    },
+
     deleteUser: async (req, res) => {
         try {
             await userRepository.findByIdAndDelete(req.params.id);
