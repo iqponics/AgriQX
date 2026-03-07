@@ -11,9 +11,7 @@ const sendEmail = async (name, email, confirmationCode) => {
         pass: process.env.SMTP_PASS,
       },
     });
-
-    await transporter.verify();
-
+    // Removed await transporter.verify() to speed up email sending
     const info = await transporter.sendMail({
       from: `"IQponics" <${process.env.SMTP_USER}>`,
       to: email,
