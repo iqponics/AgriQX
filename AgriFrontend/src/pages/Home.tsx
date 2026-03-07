@@ -5,7 +5,7 @@ import CustomSelect from "../components/CustomSelect";
 import { useDebounce } from "../hooks/useDebounce";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchVendors } from "../store/slices/vendorSlice";
-
+import SEO from "../components/SEO";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -58,6 +58,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-leaf-50 via-white to-leaf-50 py-24 px-4 sm:px-6 lg:px-8">
+      <SEO
+        title="AgriQx | Marketplace Hub"
+        description="Connect with certified agricultural partners and explore fresh sustainable produce direct from verified farms."
+      />
       <div className="max-w-7xl mx-auto">
         {/* Search Header Section */}
         <div className="mb-10 md:mb-16">

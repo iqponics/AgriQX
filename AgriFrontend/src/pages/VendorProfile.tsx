@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Star, User, MapPin } from "lucide-react";
 import { useApi } from "../hooks/useApi";
 import { userApi } from "../api/userApi";
+import SEO from "../components/SEO";
 
 interface Contact {
   _id: string;
@@ -115,6 +116,11 @@ export default function VendorProfile() {
 
   return (
     <div className="min-h-screen bg-cream-200 pt-20 px-4 mb-8 font-sans">
+      <SEO
+        title={`${vendor.name} - Verified Vendor on AgriQx`}
+        description={`View ${vendor.name}'s profile on AgriQx. ${vendor.about || `Verified vendor in ${vendor.location} with ${vendor.years} years of experience.`}`}
+        image={vendor.profilePic || undefined}
+      />
       <div className="max-w-6xl mx-auto bg-white rounded-[2rem] shadow-xl shadow-leaf-100/20 overflow-hidden border border-leaf-100">
         {/* Profile Header */}
         <div className="relative bg-gradient-to-r from-leaf-700 via-leaf-800 to-leaf-900 p-8">
@@ -147,10 +153,10 @@ export default function VendorProfile() {
               onClick={handleAddContact}
               disabled={isAdded || isConnected}
               className={`ml-auto flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg active:scale-95 ${isConnected
-                  ? "bg-leaf-600 text-white cursor-not-allowed"
-                  : isAdded
-                    ? "bg-leaf-100 text-leaf-700 border border-leaf-200 cursor-not-allowed"
-                    : "bg-white text-leaf-700 hover:bg-leaf-50 active:bg-leaf-100"
+                ? "bg-leaf-600 text-white cursor-not-allowed"
+                : isAdded
+                  ? "bg-leaf-100 text-leaf-700 border border-leaf-200 cursor-not-allowed"
+                  : "bg-white text-leaf-700 hover:bg-leaf-50 active:bg-leaf-100"
                 }`}
             >
               {isConnected ? "Connected" : isAdded ? "Request Sent" : "Add to Contacts"}

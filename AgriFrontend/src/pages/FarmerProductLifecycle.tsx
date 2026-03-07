@@ -1,14 +1,16 @@
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, useRef } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     Tag, Landmark, Sprout, Tractor, Box, Microscope, Truck, Store,
-    ArrowLeft, Loader2, Upload, ShieldCheck, CheckCircle
+    ArrowLeft, Loader2, Upload, ShieldCheck, CheckCircle, FileText
 } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 import CustomDatePicker from '../components/CustomDatePicker';
 import CustomSelect from '../components/CustomSelect';
 import { useToast } from '../components/ToastProvider';
+import ProductPDFTemplate from '../blockchain/components/ProductPDFTemplate';
+import { downloadPdf } from '../blockchain/utils/pdfGenerator';
 
 const TABS = [
     { id: 'product', label: 'Product', icon: <Tag className="w-4 h-4" /> },
@@ -35,6 +37,9 @@ export default function VendorProductLifecycle() {
         }
         return null;
     });
+
+    const pdfRef = useRef<HTMLDivElement>(null);
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
     const [formData, setFormData] = useState<any>(() => {
         if (!id) {
@@ -253,6 +258,20 @@ export default function VendorProductLifecycle() {
         }
     };
 
+    const handlePreviewPdf = async () => {
+        if (!pdfRef.current) return;
+        setIsGeneratingPdf(true);
+        try {
+            await downloadPdf(pdfRef.current, `Traceability_Report_${formData.name || 'Draft'}.pdf`);
+            success('PDF preview downloaded successfully!');
+        } catch (err) {
+            console.error('Failed to generate PDF:', err);
+            error('Failed to generate PDF. Check console.');
+        } finally {
+            setIsGeneratingPdf(false);
+        }
+    };
+
     const handleFormSubmit = async (e: React.FormEvent) => {
         if (e && e.preventDefault) e.preventDefault();
         const token = localStorage.getItem('authToken');
@@ -385,6 +404,15 @@ export default function VendorProductLifecycle() {
                         <p className="text-gray-500 mt-2 font-sans font-medium">Complete the trace details from farm production to market delivery.</p>
                     </div>
                     <div className="flex gap-4">
+                        <button
+                            onClick={handlePreviewPdf}
+                            disabled={isGeneratingPdf || formLoading}
+                            type="button"
+                            className="px-6 py-4 bg-white text-leaf-600 border border-leaf-200 rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-md hover:-translate-y-1 transition-all flex items-center gap-3"
+                        >
+                            {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                            Preview PDF
+                        </button>
                         <button
                             onClick={handleFormSubmit}
                             disabled={formLoading}
@@ -637,10 +665,10 @@ export default function VendorProductLifecycle() {
                 <div className="mt-12 flex justify-between items-center bg-white/50 backdrop-blur-md p-8 rounded-[2rem] border border-leaf-100">
                     <div className="flex gap-4">
                         {activeTab !== 'product' && <button onClick={() => setActiveTab(TABS[TABS.findIndex(t => t.id === activeTab) - 1].id)} className="px-8 py-3 rounded-2xl font-black text-leaf-600 border border-leaf-200 bg-white hover:bg-leaf-50 transition-all uppercase text-[10px] tracking-widest">Previous</button>}
-                        {activeTab !== 'distribution' && <button onClick={() => setActiveTab(TABS[TABS.findIndex(t => t.id === activeTab) + 1].id)} className="px-8 py-3 rounded-2xl font-black text-leaf-600 bg-white border border-leaf-200 hover:shadow-md transition-all uppercase text-[10px] tracking-widest">Next Step</button>}
+                        {activeTab !== 'distribution' && <button type="button" onClick={() => setActiveTab(TABS[TABS.findIndex(t => t.id === activeTab) + 1].id)} className="px-8 py-3 rounded-2xl font-black text-leaf-600 bg-white border border-leaf-200 hover:shadow-md transition-all uppercase text-[10px] tracking-widest">Next Step</button>}
                     </div>
                     <div className="flex gap-4">
-                        <button onClick={() => navigate('/farmer/my-products')} className="px-8 py-3 text-gray-400 font-black uppercase text-[10px] tracking-widest hover:text-red-500 transition-colors">Discard changes</button>
+                        <button type="button" onClick={() => navigate('/farmer/my-products')} className="px-8 py-3 text-gray-400 font-black uppercase text-[10px] tracking-widest hover:text-red-500 transition-colors">Discard changes</button>
                         <button
                             onClick={handleFormSubmit}
                             disabled={formLoading}
@@ -651,6 +679,15 @@ export default function VendorProductLifecycle() {
                         </button>
                     </div>
                 </div>
+            </div>
+
+            {/* Hidden template mapped accurately to form data state */}
+            <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', pointerEvents: 'none', zIndex: -99 }}>
+                <ProductPDFTemplate
+                    ref={pdfRef}
+                    data={formData}
+                    imagePreviewUrl={previewUrl || undefined}
+                />
             </div>
         </div>
     );

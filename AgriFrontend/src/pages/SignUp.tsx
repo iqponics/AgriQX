@@ -6,6 +6,7 @@ import { useApi } from '../hooks/useApi';
 import CustomSelect from '../components/CustomSelect';
 import { useToast } from '../components/ToastProvider';
 import { authApi } from "../api/authApi";
+import SEO from "../components/SEO";
 
 export default function SignUp() {
   const [firstName, setFirstName] = useState('');
@@ -66,6 +67,10 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-leaf-50 via-white to-leaf-50 flex items-center justify-center pt-24 py-12 px-4 sm:px-6 lg:px-8">
+      <SEO
+        title="Sign Up for AgriQx"
+        description="Join AgriQx to start discovering premium farm-to-table products with verified blockchain traceability."
+      />
       <div className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-md p-10 rounded-3xl shadow-2xl shadow-leaf-100/50 border border-leaf-100">
         <div className="flex flex-col items-center">
           <Link to="/" className="mb-6 hover:scale-105 transition-transform duration-300">

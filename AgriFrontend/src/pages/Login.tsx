@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useApi } from "../hooks/useApi";
 import { useToast } from "../components/ToastProvider";
 import { authApi } from "../api/authApi";
+import SEO from "../components/SEO";
 
 export default function Login({
   setIsAuth,
@@ -56,6 +57,10 @@ export default function Login({
 
   return (
     <div className="min-h-screen bg-[#F0FDF4] flex items-center justify-center pt-20 px-4">
+      <SEO
+        title="Log In to AgriQx"
+        description="Access your AgriQx account to manage products, track traceability, and connect with the agricultural community."
+      />
       <div className="max-w-[480px] w-full bg-white rounded-[2rem] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-green-50">
         <div className="flex flex-col items-center mb-10">
           <Link to="/" className="mb-6 hover:opacity-80 transition-opacity">

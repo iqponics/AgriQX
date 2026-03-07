@@ -8,6 +8,7 @@ import OurTopAstro from '../components/OurTopAstro';
 import OurPopularPersons from '../components/OurPopularPersons';
 import ProductsCategory from '../components/ProductsCategory';
 import Footer from '../components/Footer'
+import SEO from '../components/SEO';
 
 function LandingPage() {
   useEffect(() => {
@@ -34,6 +35,10 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-cream-50 text-charcoal-900 overflow-x-hidden">
+      <SEO
+        title="Welcome to AgriQx | Transparent Agricultural Supply Chain"
+        description="AgriQx brings farm-to-table transparency using blockchain technology. Discover verified fresh produce directly from trusted farmers and vendors."
+      />
       {/* Navbar handled by App.tsx */}
       <Hero />
       <div id="about">
