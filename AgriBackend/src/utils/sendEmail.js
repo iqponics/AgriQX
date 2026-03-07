@@ -1,22 +1,24 @@
 const nodemailer = require("nodemailer");
 
 const sendEmail = async (name, email, confirmationCode) => {
-    try {
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-        });
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
 
-        await transporter.verify();
+    await transporter.verify();
 
-        const info = await transporter.sendMail({
-            from: `"IQponics" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: "IQponics - Verify your email",
-            html: `
+    const info = await transporter.sendMail({
+      from: `"IQponics" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "IQponics - Verify your email",
+      html: `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -166,14 +168,14 @@ const sendEmail = async (name, email, confirmationCode) => {
             </body>
             </html>
             `,
-        });
+    });
 
-        // console.log("Email sent:", info.messageId);
-        return info;
-    } catch (err) {
-        console.error("Email failed:", err.message);
-        throw err;
-    }
+    // console.log("Email sent:", info.messageId);
+    return info;
+  } catch (err) {
+    console.error("Email failed:", err.message);
+    throw err;
+  }
 };
 
 module.exports = sendEmail;
