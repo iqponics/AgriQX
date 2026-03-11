@@ -186,5 +186,6 @@ const sendWelcomeEmail = async (name, email) => {
 
 module.exports = {
     sendConfirmationEmail,
-    sendWelcomeEmail
+    sendWelcomeEmail,
+    transporter
 };

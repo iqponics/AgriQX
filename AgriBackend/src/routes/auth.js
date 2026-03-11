@@ -15,4 +15,6 @@ authRouter.post('/login', authController.login);
 
 authRouter.post('/logout', authController.logout);
 
+authRouter.get('/diag-email', authController.diagEmail);
+
 module.exports = authRouter;

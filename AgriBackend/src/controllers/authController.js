@@ -173,6 +173,32 @@ const authController = {
             console.error("Google Callback Error:", err);
             return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
         }
+    },
+
+    // ================= SMTP DIAGNOSTICS =================
+    diagEmail: async (req, res) => {
+        const { transporter } = require('../config/nodemailer');
+        try {
+            await transporter.verify();
+            return res.status(200).json({
+                status: "Success",
+                message: "SMTP server is connected and ready.",
+                config: {
+                    host: process.env.SMTP_HOST,
+                    port: process.env.SMTP_PORT,
+                    user: process.env.SMTP_USER,
+                    // pass: "HIDDEN"
+                }
+            });
+        } catch (err) {
+            return res.status(500).json({
+                status: "Error",
+                message: "SMTP Connection Failed",
+                error: err.message,
+                code: err.code,
+                command: err.command
+            });
+        }
     }
 };
 
