@@ -36,7 +36,8 @@ const authController = {
             // Fire and forget email sending to speed up the API response
             sendConfirmationEmail(user.firstname, user.emailId, user.confirmationCode).catch(emailErr => {
                 // Email failure should NOT block registration — just log it
-                console.error("Email sending failed (non-fatal):", emailErr.message);
+                console.error("❌ Registration Email failed to send to:", user.emailId);
+                console.error("Error details:", emailErr);
             });
 
             return res.status(200).json({
