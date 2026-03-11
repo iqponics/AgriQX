@@ -2,20 +2,24 @@ const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports like 587
+    port: parseInt(process.env.SMTP_PORT, 10) || 465,
+    secure: parseInt(process.env.SMTP_PORT, 10) === 465, 
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
+    tls: {
+        // Do not fail on invalid certs
+        rejectUnauthorized: false
+    }
 });
 
 // Verify connection configuration
 transporter.verify(function (error, success) {
     if (error) {
-        console.error("SMTP Connection Error:", error);
+        console.error("❌ SMTP Connection Error:", error);
     } else {
-        console.log("SMTP Server is ready to take our messages");
+        console.log("✅ SMTP Server is ready (iqponics)");
     }
 });
 

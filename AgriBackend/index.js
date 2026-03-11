@@ -1,7 +1,15 @@
 require("dotenv").config();
 
 // ── Required environment variable guard ──────────────────────────────────────
-const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET", "REFRESH_SECRET"];
+const REQUIRED_ENV = [
+  "MONGO_URI", 
+  "JWT_SECRET", 
+  "REFRESH_SECRET",
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_USER",
+  "SMTP_PASS"
+];
 const missingEnv = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missingEnv.length) {
   console.error(`❌  Missing required environment variables: ${missingEnv.join(", ")}`);

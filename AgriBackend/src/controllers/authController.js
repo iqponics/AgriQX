@@ -33,6 +33,8 @@ const authController = {
                 return res.status(500).json({ message: "User data incomplete." });
             }
 
+            console.log(`📩 Attempting to send confirmation email to: ${user.emailId}`);
+
             // Fire and forget email sending to speed up the API response
             sendConfirmationEmail(user.firstname, user.emailId, user.confirmationCode).catch(emailErr => {
                 // Email failure should NOT block registration — just log it
