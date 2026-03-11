@@ -1,7 +1,7 @@
 const userRepository = require('../repositories/userRepository');
 const authService = require('../services/authService');
 const { v4: uuidv4 } = require('uuid');
-const sendEmail = require('../utils/sendEmail.js'); // FIXED PATH (change if needed)
+const { sendConfirmationEmail, sendWelcomeEmail } = require('../config/nodemailer');
 const jwt = require('jsonwebtoken');
 
 const authController = {
@@ -34,7 +34,7 @@ const authController = {
             }
 
             // Fire and forget email sending to speed up the API response
-            sendEmail(user.firstname, user.emailId, user.confirmationCode).catch(emailErr => {
+            sendConfirmationEmail(user.firstname, user.emailId, user.confirmationCode).catch(emailErr => {
                 // Email failure should NOT block registration — just log it
                 console.error("Email sending failed (non-fatal):", emailErr.message);
             });
@@ -130,6 +130,11 @@ const authController = {
 
             user.status = "Active";
             await userRepository.saveUser(user);
+
+            // Send Welcome Email
+            sendWelcomeEmail(user.firstname, user.emailId).catch(emailErr => {
+                console.error("Welcome email sending failed (non-fatal):", emailErr.message);
+            });
 
             return res.status(200).json({ message: 'Email verified successfully!' });
 

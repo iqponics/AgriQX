@@ -28,8 +28,6 @@ const PORT = process.env.PORT || 5000;
 // Create HTTP server
 const server = http.createServer(app);
 
-// Define allowed origins – driven by environment variables.
-// Set CLIENT_URL (and optionally CLIENT_URL_2) in your Render dashboard.
 const allowedOrigins = ["http://localhost:5173"];
 
 if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
