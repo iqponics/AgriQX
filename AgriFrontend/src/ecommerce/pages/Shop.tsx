@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, Filter, Loader2, Scale, DollarSign, X } from "lucide-react";
+import { Search, ShoppingCart, Filter, Loader2, Scale, DollarSign, X, ShieldCheck } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 import CustomSelect from "../../components/CustomSelect";
@@ -27,6 +27,7 @@ interface BackendProduct {
         firstname: string;
         lastname: string;
     };
+    blockchainVerificationUrl?: string;
 }
 
 export default function Shop() {
@@ -154,10 +155,15 @@ export default function Shop() {
                             <div key={product._id} className="bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-leaf-100 overflow-hidden shadow-xl shadow-leaf-100/10 hover:shadow-leaf-200/40 transition-all group flex flex-col">
                                 <div className="relative h-64 overflow-hidden">
                                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                                    <div className="absolute bottom-4 left-4">
+                                    <div className="absolute bottom-4 left-4 flex gap-2">
                                         <span className="bg-leaf-600/90 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm">
                                             {product.category}
                                         </span>
+                                        {product.blockchainVerificationUrl && (
+                                            <span className="bg-emerald-600/90 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm flex items-center gap-1">
+                                                <ShieldCheck className="w-3 h-3" /> BC Verified
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 

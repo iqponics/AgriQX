@@ -4,7 +4,7 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Calendar, MapPin, ArrowLeft, Loader2, Landmark, Sprout, Tractor, Microscope, Truck, CheckCircle, Thermometer, Box, Activity, Leaf, ShieldCheck, Award, XCircle, Clock } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, Loader2, Landmark, Sprout, Tractor, Microscope, Truck, CheckCircle, Thermometer, Box, Activity, Leaf, ShieldCheck, Award, XCircle, Clock, ExternalLink } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 import { useToast } from '../components/ToastProvider';
 
@@ -93,6 +93,7 @@ interface Product {
         retailer: string;
         city: string;
     };
+    blockchainVerificationUrl?: string;
 }
 
 interface LifecycleSectionProps {
@@ -252,6 +253,16 @@ export default function PublicProductDetails() {
                             <div className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100/50 shadow-sm">
                                 <ShieldCheck className="w-3 h-3" /> Traceability Verified
                             </div>
+                            {product.blockchainVerificationUrl && (
+                                <a
+                                    href={product.blockchainVerificationUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm hover:bg-indigo-100 transition-all"
+                                >
+                                    <ExternalLink className="w-3 h-3" /> View on Blockchain
+                                </a>
+                            )}
                             <div className="flex items-center gap-2 px-4 py-1.5 bg-charcoal-50 text-charcoal-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-charcoal-100/50 shadow-sm">
                                 <Award className="w-3 h-3" /> Batch: {product.batchNo}
                             </div>

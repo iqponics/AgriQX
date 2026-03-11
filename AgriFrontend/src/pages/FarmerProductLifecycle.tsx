@@ -457,7 +457,7 @@ export default function VendorProductLifecycle() {
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-leaf-50"><Loader2 className="w-12 h-12 text-leaf-600 animate-spin" /></div>;
 
     return (
-        <div className="min-h-screen bg-[#f8faf8] pb-24 font-poppins">
+        <div className="min-h-screen bg-[#f8faf8] pb-24 pt-10 font-poppins">
             <div className="max-w-7xl mx-auto px-4 pt-10">
                 <div className="flex justify-between items-center mb-10">
                     <div>

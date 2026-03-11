@@ -27,6 +27,7 @@ interface Product {
     distribution?: any;
     vendorId?: string;
     status: 'pending' | 'approved' | 'rejected';
+    blockchainVerificationUrl?: string;
 }
 
 export default function ProductCart() {
@@ -132,7 +133,14 @@ export default function ProductCart() {
                                                         <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-black text-charcoal-900 text-base">{product.name}</h4>
+                                                        <div className="flex items-center gap-2">
+                                                            <h4 className="font-black text-charcoal-900 text-base">{product.name}</h4>
+                                                            {product.blockchainVerificationUrl && (
+                                                                <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md border border-emerald-100 text-[8px] font-black uppercase tracking-tighter" title="Verified on Blockchain">
+                                                                    <ShieldCheck className="w-2.5 h-2.5" /> BC
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                         <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
                                                             <Layers className="w-3 h-3" /> {product.batchNo}
                                                         </div>
