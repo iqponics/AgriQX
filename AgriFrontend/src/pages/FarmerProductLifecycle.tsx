@@ -3,14 +3,14 @@ import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     Tag, Landmark, Sprout, Tractor, Box, Microscope, Truck, Store,
-    ArrowLeft, Loader2, Upload, ShieldCheck, CheckCircle, FileText
+    ArrowLeft, Loader2, Upload, ShieldCheck, CheckCircle, FileText, ExternalLink
 } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 import CustomDatePicker from '../components/CustomDatePicker';
 import CustomSelect from '../components/CustomSelect';
 import { useToast } from '../components/ToastProvider';
 import ProductPDFTemplate from '../blockchain/components/ProductPDFTemplate';
-import { downloadPdf } from '../blockchain/utils/pdfGenerator';
+import { downloadPdf, generatePdfBlob } from '../blockchain/utils/pdfGenerator';
 
 const TABS = [
     { id: 'product', label: 'Product', icon: <Tag className="w-4 h-4" /> },
@@ -40,6 +40,8 @@ export default function VendorProductLifecycle() {
 
     const pdfRef = useRef<HTMLDivElement>(null);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const [isVerifyingBlockchain, setIsVerifyingBlockchain] = useState(false);
+    const [blockchainVerificationUrl, setBlockchainVerificationUrl] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<any>(() => {
         if (!id) {
@@ -230,6 +232,11 @@ export default function VendorProductLifecycle() {
                 distribution_pricePerKg: p.distribution?.pricePerKg || ''
             });
             setPreviewUrl(p.imageUrl);
+            // Load blockchain verification status if already verified
+            if (p.blockchainVerificationUrl) {
+                console.log('[Blockchain] Product already verified:', p.blockchainVerificationUrl);
+                setBlockchainVerificationUrl(p.blockchainVerificationUrl);
+            }
         } catch (err) {
             console.error('Error fetching product details:', err);
             error('Failed to load product details');
@@ -269,6 +276,65 @@ export default function VendorProductLifecycle() {
             error('Failed to generate PDF. Check console.');
         } finally {
             setIsGeneratingPdf(false);
+        }
+    };
+
+    const handleVerifyWithBlockchain = async () => {
+        if (!id) {
+            error('Save the product first before verifying on blockchain.');
+            return;
+        }
+        if (!pdfRef.current) {
+            error('PDF template not ready. Please try again.');
+            return;
+        }
+
+        console.log('[Blockchain] 🚀 Starting blockchain verification for product:', id);
+        setIsVerifyingBlockchain(true);
+
+        try {
+            // Step 1 – Generate PDF blob from hidden template
+            console.log('[Blockchain] 📄 Generating PDF blob...');
+            const pdfBlob = await generatePdfBlob(pdfRef.current);
+            console.log('[Blockchain] ✅ PDF blob generated, size:', pdfBlob.size, 'bytes');
+
+            // Step 2 – Convert blob → base64
+            const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve((reader.result as string).split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(pdfBlob);
+            });
+            console.log('[Blockchain] ✅ PDF converted to base64, length:', base64.length);
+
+            // Step 3 – Send to backend
+            console.log('[Blockchain] 📡 Sending to backend /api/blockchain/submit...');
+            const token = localStorage.getItem('authToken');
+            const response = await axios.post(
+                `${API_BASE_URL}/api/blockchain/submit`,
+                {
+                    productId: id,
+                    pdfBase64: base64,
+                    productName: formData.name,
+                    harvestDate: formData.harvest_harvestDate,
+                    expiryDate: formData.expiryDate,
+                    farmerName: 'AgriQX Farmer'
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            console.log('[Blockchain] 🎉 Backend response:', response.data);
+            const { verificationUrl, message } = response.data;
+
+            setBlockchainVerificationUrl(verificationUrl);
+            success(message || 'Blockchain verification successful! 🎉');
+        } catch (err: any) {
+            console.error('[Blockchain] ❌ Error during verification:', err);
+            console.error('[Blockchain] Response data:', err.response?.data);
+            const msg = err.response?.data?.message || err.message || 'Blockchain verification failed';
+            error(msg);
+        } finally {
+            setIsVerifyingBlockchain(false);
         }
     };
 
@@ -403,24 +469,59 @@ export default function VendorProductLifecycle() {
                         </h1>
                         <p className="text-gray-500 mt-2 font-sans font-medium">Complete the trace details from farm production to market delivery.</p>
                     </div>
-                    <div className="flex gap-4">
-                        <button
-                            onClick={handlePreviewPdf}
-                            disabled={isGeneratingPdf || formLoading}
-                            type="button"
-                            className="px-6 py-4 bg-white text-leaf-600 border border-leaf-200 rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-md hover:-translate-y-1 transition-all flex items-center gap-3"
-                        >
-                            {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                            Preview PDF
-                        </button>
-                        <button
-                            onClick={handleFormSubmit}
-                            disabled={formLoading}
-                            className="px-10 py-4 bg-leaf-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-xl shadow-leaf-200 hover:scale-105 active:scale-95 disabled:bg-gray-300 disabled:scale-100 transition-all flex items-center gap-3"
-                        >
-                            {formLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-                            {id ? 'Commit Update' : 'Deploy Batch'}
-                        </button>
+                    <div className="flex flex-col items-end gap-3">
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handlePreviewPdf}
+                                disabled={isGeneratingPdf || formLoading}
+                                type="button"
+                                className="px-6 py-4 bg-white text-leaf-600 border border-leaf-200 rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-md hover:-translate-y-1 transition-all flex items-center gap-3"
+                            >
+                                {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                                Preview PDF
+                            </button>
+
+                            {/* Verify with Blockchain button – only for existing (saved) products */}
+                            {id && (
+                                <button
+                                    onClick={handleVerifyWithBlockchain}
+                                    disabled={isVerifyingBlockchain || formLoading || !!blockchainVerificationUrl}
+                                    type="button"
+                                    title={blockchainVerificationUrl ? 'Already verified on blockchain' : 'Upload PDF to ProofEasy blockchain'}
+                                    className={`px-6 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-md transition-all flex items-center gap-3
+                                        ${blockchainVerificationUrl
+                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 cursor-default'
+                                            : 'bg-indigo-600 text-white hover:-translate-y-1 hover:bg-indigo-700 disabled:bg-gray-300 disabled:scale-100'}`}
+                                >
+                                    {isVerifyingBlockchain
+                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                        : <ShieldCheck className="w-4 h-4" />}
+                                    {blockchainVerificationUrl ? 'Blockchain Verified ✓' : 'Verify with Blockchain'}
+                                </button>
+                            )}
+
+                            <button
+                                onClick={handleFormSubmit}
+                                disabled={formLoading}
+                                className="px-10 py-4 bg-leaf-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-xl shadow-leaf-200 hover:scale-105 active:scale-95 disabled:bg-gray-300 disabled:scale-100 transition-all flex items-center gap-3"
+                            >
+                                {formLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                                {id ? 'Commit Update' : 'Deploy Batch'}
+                            </button>
+                        </div>
+
+                        {/* Verification badge – shown once blockchain URL is available */}
+                        {blockchainVerificationUrl && (
+                            <a
+                                href={blockchainVerificationUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-300 text-emerald-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all"
+                            >
+                                <ExternalLink className="w-3 h-3" />
+                                View on Blockchain
+                            </a>
+                        )}
                     </div>
                 </div>
 

@@ -110,6 +110,7 @@ app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api/astrologerForm', require('./src/routes/astrologerForm'));
 app.use('/api/payment', require('./src/routes/payment'));
 app.use('/api/products', require('./src/routes/productRoutes'));
+app.use('/api/blockchain', require('./src/routes/blockchainRoutes'));
 
 // Start the server
 server.listen(PORT, () => {

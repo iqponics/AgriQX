@@ -112,8 +112,8 @@ const productController = {
             res.status(201).json(savedProduct);
 
         } catch (err) {
-            console.error("Error creating product:", err);
-            res.status(500).json({ message: "Failed to create product" });
+            console.error("Error creating product:", err.message, err.errors);
+            res.status(400).json({ message: err.message || "Failed to create product" });
         }
     },
 
